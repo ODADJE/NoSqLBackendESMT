@@ -110,7 +110,16 @@ const update = catchAsync(async (req, res, next) => {
  * @return {Object} The JSON response with the deleted user data and status code.
  */
 const deleteOne = catchAsync(async (req, res, next) => {
+  if (req.user.email === "admin@admin.com")
+    next(new AppError("You are not allowed to delete this user", 403));
+
+  const userToDelete = await User.findById(req.params.id);
+
+  if (req.user._id === userToDelete._id)
+    next(new AppError("You are not allowed to delete yourself", 403));
+
   const user = await User.findByIdAndDelete(req.params.id);
+
   return sendUser(user, 204, res);
 });
 
